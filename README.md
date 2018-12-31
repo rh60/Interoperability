@@ -1,1 +1,1 @@
-# MMP
+# MMP Moderní Metody Programování
