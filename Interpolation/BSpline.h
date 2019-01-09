@@ -1,10 +1,9 @@
 #pragma once
 #include <vector>
 #include <array>
-#include <stack>
 
 typedef std::vector<double> vec;
-typedef std::array<double,2> point;
+typedef std::array<double, 2> point;
 
 class BSpline
 {
@@ -24,7 +23,7 @@ BSpline::BSpline(vec knots)
 {
 	U = knots;
 	p = 0;
-	for (size_t i = 0; i < U.size(); i++)
+	for (size_t i = 1; i < U.size(); i++)
 	{
 		if (U[i] == U[i - 1])
 			p++;
@@ -32,7 +31,6 @@ BSpline::BSpline(vec knots)
 			break;
 	}
 }
-
 
 BSpline::~BSpline()
 {
@@ -47,7 +45,7 @@ inline vec BSpline::BasisFuns(size_t i, double u)
 {
 	auto left = [i, u, this](size_t j) {return u - U[i + 1 - j]; };
 	auto right = [i, u, this](size_t j) {return U[i + j] - u; };
-	
+
 	vec N(p + 1);
 	N[0] = 1.0;
 	for (size_t j = 1; j <= p; j++)
@@ -66,7 +64,9 @@ inline vec BSpline::BasisFuns(size_t i, double u)
 
 inline vec BSpline::Values(size_t i, size_t n)
 {
-	vec v(n+1);
+	if (U[i] == U[i + 1])
+		return {};
+	vec v(n + 1);
 	v[0] = U[i];
 	v[n] = U[i + 1];
 	double h = (U[i + 1] - U[i]) / n;
@@ -88,12 +88,12 @@ inline std::vector<std::vector<point>> BSpline::Bases()
 			for (int j = 0; j <= p; j++)
 				if (!L[start + j].empty())
 					L[start + j].pop_back();
-			for( auto u : Values(i))
+			for (auto u : Values(i))
 			{
 				auto v = BasisFuns(i, u);
 				for (int j = 0; j <= p; j++)
 				{
-					point p = {u, v[j]};
+					point p = { u, v[j] };
 					L[start + j].push_back(p);
 				}
 			}
@@ -102,4 +102,3 @@ inline std::vector<std::vector<point>> BSpline::Bases()
 	}
 	return L;
 }
-
