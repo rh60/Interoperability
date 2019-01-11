@@ -10,6 +10,7 @@ namespace MMP
     {
         public double[] U; // knots (Uzly)
         public int p; // order (Řád)
+
         public BSpline(params double[] knots)
         {
             U = knots;
@@ -67,47 +68,63 @@ namespace MMP
             }
             return N;
         }
- 
-        IEnumerable<double> Values(int i, int n=25)
+
+        IEnumerable<double> Values(int i)
         {
-            double h = (U[i + 1] - U[i]) / n;
+            double h = (U[i + 1] - U[i]) / N;
             if (h == 0)
                 yield break;
             double value = U[i];
-            for (int j = 0; j < n; j++)
+            for (int j = 0; j < N; j++)
             {
                 yield return value;
                 value += h;
             }
             yield return U[i + 1];
         }
-      
+
         public struct Point
         {
             public double x, y;
         }
+
+        int n = 25;
+        public int N
+        {
+            get
+            { return n; }
+            set
+            {
+                n = value;
+                L = null;
+            }
+        }
+        List<List<Point>> L;
         public List<List<Point>> Bases
         {
             get
             {
-                List<List<Point>> L = new List<List<Point>>();
-                int start = -p;
-                for (int i = 0; i + p + 1 < U.Length; i++)
+                if (L == null)
                 {
-                    L.Add(new List<Point> ());
-                    if (Values(i).Any())
+                    L = new List<List<Point>>();
+                    int start = -p;
+                    for (int i = 0; i + p + 1 < U.Length; i++)
                     {
-                        for (int j = 0; j <= p; j++)
-                            if(L[start + j].Any())
-                                L[start + j].RemoveAt(L[start + j].Count-1);
-                        foreach (var u in Values(i))
+                        L.Add(new List<Point>());
+                        if (Values(i).Any())
                         {
-                            var v = BasisFuns(i, u);
                             for (int j = 0; j <= p; j++)
-                                L[start + j].Add(new Point { x = u, y = v[j] });                                                        
-                        }                                                
+                                if (L[start + j].Any())
+                                    L[start + j].RemoveAt(L[start + j].Count - 1);
+                            foreach (var u in Values(i))
+                            {
+                                var v = BasisFuns(i, u);
+                                for (int j = 0; j <= p; j++)
+                                    L[start + j].Add(new Point { x = u, y = v[j] });
+                            }
+                        }
+                        start++;
                     }
-                    start++;
                 }
                 return L;
                 //return L.Select(a => a.ToArray()).ToArray();
@@ -117,4 +134,3 @@ namespace MMP
     }
 }
 
-    
