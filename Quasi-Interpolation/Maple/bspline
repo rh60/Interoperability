@@ -1,0 +1,21 @@
+p:=3;
+xi:=0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4, 4:
+n:=numelems([xi]);
+
+for j from 1 to n-1 do
+  B[j,0]:=piecewise(xi[j]<=x and x<xi[j+1],1);
+end:
+
+for i from 1 to n-2 do
+  for j from 1 to n-1-i do
+  	B[j,i]:=0;
+  	h:=xi[j+i]-xi[j];
+  	if h>0 then		
+  		B[j,i]:=B[j,i]+(x-xi[j])/h*B[j,i-1];	
+  	end;
+  	h:=xi[j+i+1]-xi[j+1];
+  	if h>0 then		
+  		B[j,i]:=B[j,i]+(xi[j+i+1]-x)/h*B[j+1,i-1];	
+  	end;
+  end;
+end;
